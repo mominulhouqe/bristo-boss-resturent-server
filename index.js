@@ -39,13 +39,18 @@ async function run() {
 
     const bristoBossCollection = client.db("bristoBoss").collection("menu");
 
+    const bristoBossReviewCollection = client.db('bristoBoss').collection("reviews")
+
     app.get("/menu", async (req, res) => {
       const cursor = bristoBossCollection.find();
       const results = await cursor.toArray();
       res.send(results);
     });
 
-
+app.get("/reviews", async(req, res) => {
+  const results = await bristoBossReviewCollection.find().toArray();
+  res.send(results)
+})
 
 
 
