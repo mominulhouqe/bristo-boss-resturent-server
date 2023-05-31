@@ -16,8 +16,6 @@ app.get("/", (req, res) => {
   res.send("Bristo boss is running!");
 });
 
-console.log(process.env.DB_USER);
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.34btmna.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -32,41 +30,48 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-
-
-
+    // await client.connect();
 
     const bristoBossCollection = client.db("bristoBoss").collection("menu");
+    // Bristo boss review collection
+    const bristoBossReviewCollection = client
+      .db("bristoBoss")
+      .collection("reviews");
 
-    const bristoBossReviewCollection = client.db('bristoBoss').collection("reviews")
+    // cart collection
+    const cartCollection = client.db("bristoBoss").collection("carts");
 
+    // menu items here
     app.get("/menu", async (req, res) => {
       const cursor = bristoBossCollection.find();
       const results = await cursor.toArray();
       res.send(results);
     });
 
-app.get("/reviews", async(req, res) => {
-  const results = await bristoBossReviewCollection.find().toArray();
-  res.send(results)
-})
+    // reviews items here
+    app.get("/reviews", async (req, res) => {
+      const results = await bristoBossReviewCollection.find().toArray();
+      res.send(results);
+    });
 
+    // cart collectionn  apis
+    app.get("/carts", async (req, res) => {
+      const email = req.query.email;
 
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
 
+    app.post("/carts", async (req, res) => {
+      const items = req.body;
 
-
-
-
-
-
-
-
-
-
-
-
-
+      const results = await cartCollection.insertOne(items);
+      res.send(results);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
