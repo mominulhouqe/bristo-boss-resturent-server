@@ -32,27 +32,63 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+// bristoo boss menu collection
     const bristoBossCollection = client.db("bristoBoss").collection("menu");
     // Bristo boss review collection
     const bristoBossReviewCollection = client
       .db("bristoBoss")
       .collection("reviews");
 
-    // cart collection
+    // cart collection apis
     const cartCollection = client.db("bristoBoss").collection("carts");
 
-    // menu items here
+    // users collection apis
+    const userCollection = client.db("bristoBoss").collection("users");
+
+// users releted apis
+app.get('/users', async(req, res ) => {
+  const result = await userCollection.find().toArray();
+
+  res.send(result)
+
+})
+
+
+
+    app.post('/users', async(req, res) => {
+      const users = req.body;
+      console.log(users)
+      const query = {email: users.email}
+      const exsitingUser = await userCollection.findOne(query);
+      console.log("exsiting user",exsitingUser);
+      if(exsitingUser){
+        return res.send({message : 'user already exists'})
+      }
+
+      const results = await userCollection.insertOne(users);
+      res.send(results)
+    })
+
+
+
+
+
+
+    // menu items apis
     app.get("/menu", async (req, res) => {
       const cursor = bristoBossCollection.find();
       const results = await cursor.toArray();
       res.send(results);
     });
 
-    // reviews items here
+
+    // reviews items apis
     app.get("/reviews", async (req, res) => {
       const results = await bristoBossReviewCollection.find().toArray();
       res.send(results);
     });
+
+
 
     // cart collectionn  apis
     app.get("/carts", async (req, res) => {
